@@ -203,6 +203,31 @@ public class Main {
 	}
 
 	public static void main(String[] args) throws ReflectiveOperationException {
+		var elements = new Object[1000];
+		for (int i = 0; i < elements.length; i++) {
+			Integer value = i + 1;
+			InvocationHandler handler = (_, m, a) -> {
+				System.out.print(value);
+				System.out.print("." + m.getName() + "(");
+				if (a != null) {
+					for (int j = 0; j < a.length; j++) {
+						System.out.print(a[j]);
+						if (j < a.length - 1)
+							System.out.print(", ");
+					}
+				}
+				System.out.println(")");
+				return m.invoke(value, a);
+			};
+			elements[i] = Proxy.newProxyInstance(ClassLoader.getSystemClassLoader(),
+					new Class[] { Comparable.class }, handler);
+		}
+
+		Integer key = (int) (Math.random() * elements.length) + 1;
+		int result = Arrays.binarySearch(elements, key);
+		if (result >= 0)
+			System.out.println(elements[result]);
+
 		int[] a = { 1, 3, 5, 7, 11 };
 		a = (int[]) copyOf(a, 9);
 		System.out.println(Arrays.toString(a));
